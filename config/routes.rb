@@ -98,6 +98,7 @@ Rails.application.routes.draw do
       namespace :stats, defaults: { format: :json } do
         namespace :channels, defaults: { format: :json } do
           get :twitch_channels_by_view_count
+          get :s3
           get :youtube_channels_by_view_count
         end
         resources :channels, defaults: { format: :json }, only: %i(show)

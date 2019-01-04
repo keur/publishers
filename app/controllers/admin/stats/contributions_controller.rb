@@ -7,5 +7,9 @@ class Admin::Stats::ContributionsController < AdminController
              @result.select { |entry| entry['channel'].starts_with?(YoutubeChannelDetails::YOUTUBE_PREFIX) }
                     .map{ |entry| entry['channel'].remove(YoutubeChannelDetails::YOUTUBE_PREFIX) }
       ).load
+
+
   end
+
+
 end
