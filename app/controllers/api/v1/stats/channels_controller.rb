@@ -3,36 +3,6 @@ class Api::V1::Stats::ChannelsController < Api::V1::StatsController
   def index
   end
 
-  require 'aws-sdk-s3'
-
-  def s3
-
-    sts_client = Aws::STS::Client.new(
-      access_key_id: ENV['S3_PUBLISHERS_ACCESS_KEY_ID'],
-      secret_access_key: ENV['S3_PUBLISHERS_SECRET_ACCESS_KEY'],
-      region: ENV['S3_PUBLISHERS_BUCKET_REGION']
-    )
-    role_credentials = Aws::AssumeRoleCredentials.new(
-      client: sts_client,
-      role_arn: ENV['S3_ALEXA_ARN'],
-      role_session_name: "session-name"
-    )
-
-    s3_client = Aws::S3::Client.new(credentials: role_credentials, region: ENV['S3_ALEXA_REGION'])
-    s3 =Aws::S3::Resource.new(client: s3_client)
-
-    bucket = s3.bucket(ENV['S3_ALEXA_BUCKET'])
-
-    object = []
-    bucket.objects.limit(50).each do |item|
-      puts "Name:  #{item.key}"
-      puts "URL:   #{item.presigned_url(:get)}"
-      object << { name: item.key, url: item.presigned_url(:get) }
-    end
-
-    render json: object
-  end
-
   def show
     channel = Channel.find(params[:id])
 
