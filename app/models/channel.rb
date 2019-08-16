@@ -77,7 +77,7 @@ class Channel < ApplicationRecord
   validate :verified_duplicate_channels_must_be_contested, if: -> { verified? }
 
   after_save :register_channel_for_promo, if: :should_register_channel_for_promo
-  after_save :create_channel_card, :notify_slack, if: -> { :saved_change_to_verified? && verified? }
+  after_save :create_channel_card, if: -> { :saved_change_to_verified? && verified? }
 
   before_save :clear_verified_at_if_necessary
 
@@ -383,29 +383,6 @@ class Channel < ApplicationRecord
 
   def create_channel_card
     CreateUpholdChannelCardJob.perform_later(uphold_connection_id: publisher.uphold_connection&.id, channel_id: id)
-  end
-
-  def notify_slack
-    return unless verified?
-    emoji =
-      case details_type
-      when "SiteChannelDetails"
-        "🌐"
-      when "TwitchChannelDetails"
-        "👾"
-      when "YoutubeChannelDetails"
-        "📺"
-      when "VimeoChannelDetails"
-        "🎥"
-      when "TwitterChannelDetails"
-        "🐦"
-      else
-        ""
-      end
-
-    SlackMessenger.new(
-      message: "#{emoji} *#{details.publication_title}* verified by owner #{publisher.owner_identifier}; id=#{details.channel_identifier}; url=#{details.url}"
-    ).perform
   end
 
   def site_channel_details_brave_publisher_id_unique_for_publisher
